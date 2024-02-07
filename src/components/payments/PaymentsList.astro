@@ -1,9 +1,6 @@
 ---
-import BaseLayout from "../../layouts/base.astro";
 import { pause } from "../../lib/utils/time";
 import db, { Database } from "../../app/db";
-
-let loading = true;
 
 function getPayments(db: Database, invoiceId: string): Promise<any[]> {
   return new Promise((resolve, reject) => {
@@ -23,30 +20,37 @@ function getPayments(db: Database, invoiceId: string): Promise<any[]> {
     );
   });
 }
-
-await pause(3000);
-
-console.log();
-
-const { invoice } = Astro.params;
-
-const invoices = await (invoice ? getPayments(db, invoice) : []);
-
-loading = false;
 ---
 
-<BaseLayout title="Invoice by id">
+<div>
+  <div id="paymentsListLoading">Loading...</div>
   {
-    loading ? (
-      <p>Loading...</p>
-    ) : (
-      <ul>
-        {invoices.map((v) => (
-          <li>
-            {v.date}, {v.payment}
-          </li>
-        ))}
-      </ul>
-    )
+    pause(3000)
+      .then(() => getPayments(db, Astro.params.invoice as string))
+      .then((result) => {
+        return (
+          <ul id="paymentsList" class="hidden">
+            {result.map((invoice) => (
+              <li>
+                {invoice.date}, {invoice.payment}
+              </li>
+            ))}
+          </ul>
+        );
+      })
   }
-</BaseLayout>
+</div>
+
+<style>
+  .hidden {
+    visibility: hidden;
+  }
+</style>
+
+<script>
+  const loadingIndicator = document.getElementById("paymentsListLoading");
+  const paymentsList = document.getElementById("paymentsList");
+
+  loadingIndicator.parentElement.removeChild(loadingIndicator);
+  paymentsList.classList.toggle("hidden");
+</script>
