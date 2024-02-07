@@ -1,49 +1,14 @@
 ---
 import BaseLayout from "../layouts/base.astro";
-import { pause } from "../lib/utils/time.ts";
-import db, { Database } from "../app/db";
+import ClientList from "../components/clients/ClientList.astro";
 
 export const prerender = true;
 
-async function getClients(db: Database): Promise<any[]> {
-  return new Promise((resolve) => {
-    db.all("SELECT * FROM clients", [], function (err, rows) {
-      console.log(rows);
-
-      resolve(rows);
-    });
-  });
-}
-
 const title = "Invoices";
-
-let clients: any[];
-let error = undefined;
-
-try {
-  clients = await getClients(db);
-} catch (err) {
-  console.log(err);
-  error = err;
-}
-
-await pause(3000);
 ---
 
 <BaseLayout title={title}>
   <h1>{title}</h1>
 
-  {
-    error ? (
-      <div>{error}</div>
-    ) : (
-      <ul>
-        {clients.map((client) => (
-          <li>
-            <a href={`/invoices/${client.client_id}`}>{client.name}</a>
-          </li>
-        ))}
-      </ul>
-    )
-  }
+  <ClientList />
 </BaseLayout>

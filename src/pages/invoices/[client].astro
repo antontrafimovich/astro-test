@@ -1,53 +1,9 @@
 ---
-import { Database } from "sqlite3";
 import BaseLayout from "../../layouts/base.astro";
-import { pause } from "../../lib/utils/time";
-import db from "../../app/db";
-
-let loading = true;
-
-function getInvoices(db: Database, clientId: string): Promise<any[]> {
-  return new Promise((resolve, reject) => {
-    return db.all(
-      "SELECT invoice_id, number FROM invoices WHERE client_id = ?",
-      clientId,
-      (err, rows) => {
-        if (err) {
-          console.log(err);
-          reject(err);
-          return;
-        }
-
-        console.log(rows);
-        resolve(rows as any[]);
-      }
-    );
-  });
-}
-
-await pause(3000);
-
-console.log();
-
-const { client } = Astro.params;
-
-const invoices = await (client ? getInvoices(db, client) : []);
-
-loading = false;
+import InvoicesList from "../../components/invoices/InvoicesList.astro";
 ---
 
 <BaseLayout title="Invoice by id">
-  {
-    loading ? (
-      <p>Loading...</p>
-    ) : (
-      <ul>
-        {invoices.map((v) => (
-          <li>
-            <a href={`/payments/${v.invoice_id}`}>{v.number}</a>
-          </li>
-        ))}
-      </ul>
-    )
-  }
+  <h1>Payments</h1>
+  <InvoicesList />
 </BaseLayout>

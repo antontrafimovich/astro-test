@@ -1,0 +1,56 @@
+---
+import { pause } from "../../lib/utils/time";
+import db, { Database } from "../../app/db";
+
+function getInvoices(db: Database, clientId: string): Promise<any[]> {
+  return new Promise((resolve, reject) => {
+    return db.all(
+      "SELECT invoice_id, number FROM invoices WHERE client_id = ?",
+      clientId,
+      (err, rows) => {
+        if (err) {
+          console.log(err);
+          reject(err);
+          return;
+        }
+
+        console.log(rows);
+        resolve(rows as any[]);
+      }
+    );
+  });
+}
+---
+
+<div>
+  <div id="invoicesListLoading">Loading...</div>
+  {
+    pause(3000)
+      .then(() => getInvoices(db, Astro.params.client as string))
+      .then((result) => {
+        return (
+          <ul id="invoicesList" class="hidden">
+            {result.map((invoice) => (
+              <li>
+                <a href={`/payments/${invoice.invoice_id}`}>{invoice.number}</a>
+              </li>
+            ))}
+          </ul>
+        );
+      })
+  }
+</div>
+
+<style>
+  .hidden {
+    visibility: hidden;
+  }
+</style>
+
+<script>
+  const loadingIndicator = document.getElementById("invoicesListLoading");
+  const invoicesList = document.getElementById("invoicesList");
+
+  loadingIndicator.parentElement.removeChild(loadingIndicator);
+  invoicesList.classList.toggle("hidden");
+</script>

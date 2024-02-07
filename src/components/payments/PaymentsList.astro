@@ -1,0 +1,52 @@
+---
+import BaseLayout from "../../layouts/base.astro";
+import { pause } from "../../lib/utils/time";
+import db, { Database } from "../../app/db";
+
+let loading = true;
+
+function getPayments(db: Database, invoiceId: string): Promise<any[]> {
+  return new Promise((resolve, reject) => {
+    return db.all(
+      "SELECT date, name AS payment FROM payments INNER JOIN payment_methods ON payments.payment_method = payment_methods.payment_method_id WHERE invoice_id = ?",
+      invoiceId,
+      (err, rows) => {
+        if (err) {
+          console.log(err);
+          reject(err);
+          return;
+        }
+
+        console.log(rows);
+        resolve(rows as any[]);
+      }
+    );
+  });
+}
+
+await pause(3000);
+
+console.log();
+
+const { invoice } = Astro.params;
+
+const invoices = await (invoice ? getPayments(db, invoice) : []);
+
+loading = false;
+---
+
+<BaseLayout title="Invoice by id">
+  {
+    loading ? (
+      <p>Loading...</p>
+    ) : (
+      <ul>
+        {invoices.map((v) => (
+          <li>
+            {v.date}, {v.payment}
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</BaseLayout>

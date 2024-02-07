@@ -1,0 +1,49 @@
+---
+import db, { Database } from "./../../app/db";
+import { pause } from "./../../lib/utils/time";
+
+async function getClients(db: Database): Promise<any[]> {
+  return new Promise((resolve) => {
+    db.all("SELECT * FROM clients", [], function (err, rows) {
+      console.log(rows);
+
+      resolve(rows);
+    });
+  });
+}
+
+// let clients: any[] = [];
+// try {
+//   clients = await getClients(db);
+// } catch (err) {
+//   console.log(err);
+//   error = err;
+// }
+---
+
+<div>
+  <div id="clientListLoading">Loading...</div>
+  {
+    pause(3000)
+      .then(() => getClients(db))
+      .then((result) => {
+        return (
+          <ul id="clientsList" style="visibility: hidden">
+            {result.map((client) => (
+              <li>
+                <a href={`/invoices/${client.client_id}`}>{client.name}</a>
+              </li>
+            ))}
+          </ul>
+        );
+      })
+  }
+</div>
+
+<script>
+  const loadingIndicator = document.getElementById("clientListLoading");
+  const clientsList = document.getElementById("clientsList");
+
+  loadingIndicator.parentElement.removeChild(loadingIndicator);
+  clientsList.style.visibility = "visible";
+</script>
