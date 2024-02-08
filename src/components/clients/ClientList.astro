@@ -1,4 +1,5 @@
 ---
+import Suspense from "../shared/Suspense.astro";
 import db, { Database } from "./../../app/db";
 import { pause } from "./../../lib/utils/time";
 
@@ -11,39 +12,26 @@ async function getClients(db: Database): Promise<any[]> {
     });
   });
 }
-
-// let clients: any[] = [];
-// try {
-//   clients = await getClients(db);
-// } catch (err) {
-//   console.log(err);
-//   error = err;
-// }
 ---
 
-<div>
-  <div id="clientListLoading">Loading...</div>
-  {
-    pause(3000)
-      .then(() => getClients(db))
-      .then((result) => {
-        return (
-          <ul id="clientsList" style="visibility: hidden">
-            {result.map((client) => (
-              <li>
-                <a href={`/invoices/${client.client_id}`}>{client.name}</a>
-              </li>
-            ))}
-          </ul>
-        );
-      })
-  }
-</div>
+<Suspense>
+  <div slot="fallback">Loading...</div>
 
-<script>
-  const loadingIndicator = document.getElementById("clientListLoading");
-  const clientsList = document.getElementById("clientsList");
-
-  loadingIndicator.parentElement.removeChild(loadingIndicator);
-  clientsList.style.visibility = "visible";
-</script>
+  <Fragment slot="component">
+    {
+      pause(3000)
+        .then(() => getClients(db))
+        .then((result) => {
+          return (
+            <ul id="clientsList" style="visibility: hidden">
+              {result.map((client) => (
+                <li>
+                  <a href={`/invoices/${client.client_id}`}>{client.name}</a>
+                </li>
+              ))}
+            </ul>
+          );
+        })
+    }
+  </Fragment>
+</Suspense>

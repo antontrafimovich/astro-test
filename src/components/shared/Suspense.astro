@@ -1,0 +1,29 @@
+---
+import { nanoid } from "nanoid";
+
+const uid = nanoid(6);
+---
+
+<div>
+  <div id="fallback" data-uid={uid}>
+    <slot name="fallback" />
+  </div>
+
+  <div id="content" class="hidden" data-uid={uid}>
+    <slot name="component" />
+  </div>
+</div>
+
+<style>
+  .hidden {
+    visibility: hidden;
+  }
+</style>
+
+<script>
+  const loadingIndicator = document.getElementById("fallback");
+  const paymentsList = document.getElementById("content");
+
+  loadingIndicator.parentElement.removeChild(loadingIndicator);
+  paymentsList.classList.toggle("hidden");
+</script>

@@ -1,4 +1,6 @@
 ---
+import Suspense from "../shared/Suspense.astro";
+
 import { pause } from "../../lib/utils/time";
 import db, { Database } from "../../app/db";
 
@@ -22,35 +24,24 @@ function getPayments(db: Database, invoiceId: string): Promise<any[]> {
 }
 ---
 
-<div>
-  <div id="paymentsListLoading">Loading...</div>
-  {
-    pause(3000)
-      .then(() => getPayments(db, Astro.params.invoice as string))
-      .then((result) => {
-        return (
-          <ul id="paymentsList" class="hidden">
-            {result.map((invoice) => (
-              <li>
-                {invoice.date}, {invoice.payment}
-              </li>
-            ))}
-          </ul>
-        );
-      })
-  }
-</div>
+<Suspense>
+  <div slot="fallback">Loading...</div>
 
-<style>
-  .hidden {
-    visibility: hidden;
-  }
-</style>
-
-<script>
-  const loadingIndicator = document.getElementById("paymentsListLoading");
-  const paymentsList = document.getElementById("paymentsList");
-
-  loadingIndicator.parentElement.removeChild(loadingIndicator);
-  paymentsList.classList.toggle("hidden");
-</script>
+  <Fragment slot="component">
+    {
+      pause(3000)
+        .then(() => getPayments(db, Astro.params.invoice as string))
+        .then((result) => {
+          return (
+            <ul id="paymentsList" class="hidden">
+              {result.map((invoice) => (
+                <li>
+                  {invoice.date}, {invoice.payment}
+                </li>
+              ))}
+            </ul>
+          );
+        })
+    }
+  </Fragment>
+</Suspense>
