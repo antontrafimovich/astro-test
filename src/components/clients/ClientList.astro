@@ -23,7 +23,7 @@ async function getClients(db: Database): Promise<any[]> {
         .then(() => getClients(db))
         .then((result) => {
           return (
-            <ul id="clientsList" style="visibility: hidden">
+            <ul id="clientsList">
               {result.map((client) => (
                 <li>
                   <a href={`/invoices/${client.client_id}`}>{client.name}</a>

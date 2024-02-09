@@ -1,5 +1,5 @@
 ---
-import Suspense from "../shared/Suspense.astro";
+import Suspense from "../shared/lib/utils/Suspense.astro";
 
 import { pause } from "../../lib/utils/time";
 import db, { Database } from "../../app/db";
@@ -33,7 +33,7 @@ function getPayments(db: Database, invoiceId: string): Promise<any[]> {
         .then(() => getPayments(db, Astro.params.invoice as string))
         .then((result) => {
           return (
-            <ul id="paymentsList" class="hidden">
+            <ul id="paymentsList">
               {result.map((invoice) => (
                 <li>
                   {invoice.date}, {invoice.payment}
